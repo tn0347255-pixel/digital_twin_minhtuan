@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trung Tâm Giám Sát Toàn Diện 1m2</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="header">Hệ Thống Phân Tích AI & Thu Thập Dữ Liệu Khối Lớn</div>
+
+    <div class="dashboard">
+        <!-- CỘT TRÁI: AI Camera & 16 Relay -->
+        <div class="column">
+            <div class="panel">
+                <div class="panel-title">AI Camera Nhận Diện Bệnh</div>
+                <img class="camera-feed" src="/video_feed" alt="Đang chờ Camera...">
+            </div>
+
+            <div class="panel" style="margin-top: 20px;">
+                <div class="panel-title">Điều Khiển 16 Kênh Relay (PCF8575)</div>
+                <div class="relay-grid" id="relay-container">
+                    <!-- Javascript sẽ tự động sinh ra 16 nút nhấn -->
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: Toàn Bộ Dữ Liệu Cảm Biến -->
+        <div class="column">
+            <!-- Dữ liệu Không khí (I2C) -->
+            <div class="panel">
+                <div class="panel-title">Môi Trường Không Khí & Khí Tượng</div>
+                <div class="sensor-grid">
+                    <div class="sensor-box">AHT20 #1 (Nhiệt/Ẩm)<br><span class="sensor-val"><span id="a1T">--</span>°C / <span id="a1H">--</span>%</span></div>
+                    <div class="sensor-box">AHT20 #2 (Nhiệt/Ẩm)<br><span class="sensor-val"><span id="a2T">--</span>°C / <span id="a2H">--</span>%</span></div>
+                    <div class="sensor-box">Khoảng cách Nước<br><span class="sensor-val"><span id="dist">--</span> cm</span></div>
+                    
+                    <div class="sensor-box">BMP180 #1 (Nhiệt)<br><span class="sensor-val"><span id="b1T">--</span> °C</span></div>
+                    <div class="sensor-box">BMP180 #2 (Nhiệt)<br><span class="sensor-val"><span id="b2T">--</span> °C</span></div>
+                    <div class="sensor-box">BMP280 (Nhiệt)<br><span class="sensor-val"><span id="b3T">--</span> °C</span></div>
+                </div>
+            </div>
+            
+            <!-- Dữ liệu Đất & Nước (Analog qua ADS1115) -->
+            <div class="panel">
+                <div class="panel-title">Dữ Liệu Đất & Nước (6 Kênh ADC 16-bit)</div>
+                <div class="sensor-grid" style="grid-template-columns: repeat(2, 1fr);">
+                    <!-- ADS1115 Số 1 (0x48) -->
+                    <div class="sensor-box">ADC1 - Chân A0<br><span class="sensor-val" id="ad1_0">--</span></div>
+                    <div class="sensor-box">ADC1 - Chân A1<br><span class="sensor-val" id="ad1_1">--</span></div>
+                    <div class="sensor-box">ADC1 - Chân A2<br><span class="sensor-val" id="ad1_2">--</span></div>
+                    <div class="sensor-box">ADC1 - Chân A3<br><span class="sensor-val" id="ad1_3">--</span></div>
+                    
+                    <!-- ADS1115 Số 2 (0x49) -->
+                    <div class="sensor-box">ADC2 - Chân A0<br><span class="sensor-val" id="ad2_0">--</span></div>
+                    <div class="sensor-box">ADC2 - Chân A1<br><span class="sensor-val" id="ad2_1">--</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
