@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Digital Twin - Three.js</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #1a1a1a; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+
+    <!-- Khai báo thư viện Three.js thông qua CDN trực tuyến -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        // 1. Khởi tạo không gian hiển thị (Scene), Camera và Renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // 2. Thêm hệ thống ánh sáng để thấy rõ khối 3D
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+        directionalLight.position.set(5, 10, 7);
+        scene.add(directionalLight);
+
+        // 3. Thêm công cụ điều khiển chuột (Xoay, phóng to, thu nhỏ mô hình)
+        const controls = new OrbitControls(camera, renderer.domElement);
+        camera.position.set(0, 5, 10);
+        controls.update();
+
+        // 4. Tải mô hình 3D (model.glb) vào trang web
+        const loader = new GLTFLoader();
+        loader.load('model.glb', (gltf) => {
+            scene.add(gltf.scene);
+            console.log('Đã tải mô hình thành công!');
+        }, undefined, (error) => {
+            console.error('Lỗi khi tải mô hình:', error);
+        });
+
+        // 5. Vòng lặp render liên tục khung hình
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Tự động căn chỉnh lại khi thay đổi kích thước cửa sổ trình duyệt
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+
+</body>
+</html>
