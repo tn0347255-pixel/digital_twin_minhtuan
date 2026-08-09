@@ -1,0 +1,117 @@
+body {
+    background-color: #0b131e;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+.header {
+    color: #00ffcc;
+    font-size: 26px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 20px;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.panel {
+    background-color: rgba(16, 30, 48, 0.85);
+    border: 1px solid #00ffcc;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+    padding: 20px;
+}
+
+.panel-title {
+    color: #00ffcc;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(0, 255, 204, 0.3);
+    padding-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.camera-feed {
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid #00ffcc;
+    background-color: #000;
+}
+
+.sensor-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.sensor-box {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #333;
+    text-align: center;
+    font-size: 13px;
+    color: #b0c4de;
+}
+
+.sensor-val {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffeb3b;
+    display: block;
+    margin-top: 5px;
+}
+
+.relay-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.relay-btn {
+    background-color: #1a2a3a;
+    color: #ffffff;
+    border: 1px solid #333;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+/* Các trạng thái của nút nhấn */
+.relay-btn:hover { border-color: #00ffcc; }
+
+/* Trạng thái Pending: Đang gửi lệnh đi (Màu vàng) */
+.relay-btn.pending {
+    background-color: #f59e0b;
+    color: #000000;
+    border-color: #ffffff;
+    box-shadow: 0 0 10px #f59e0b;
+}
+
+/* Trạng thái Active: Mạch đã thực sự đóng Relay (Màu xanh) */
+.relay-btn.active {
+    background-color: #00ffcc;
+    color: #000000;
+    border-color: #ffffff;
+    box-shadow: 0 0 10px #00ffcc;
+}
