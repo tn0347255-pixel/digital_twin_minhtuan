@@ -1,74 +1,271 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Digital Twin - Three.js</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Twin Command Center - Minhtuan</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #1a1a1a; }
-        canvas { display: block; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #020617;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #00f0ff;
+        }
+
+        /* Vùng hiển thị 3D Three.js nền phía sau */
+        #webgl-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Giao diện HUD Sci-Fi phủ lên trên */
+        .hud-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none; /* Cho phép click xuyên qua để xoay mô hình 3D */
+            display: grid;
+            grid-template-rows: 60px 1fr;
+            grid-template-columns: 320px 1fr 320px;
+            padding: 15px;
+            gap: 15px;
+        }
+
+        /* Cho phép tương tác với các bảng điều khiển HUD */
+        .hud-panel {
+            pointer-events: auto;
+            background: rgba(3, 15, 39, 0.75);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            box-shadow: inset 0 0 15px rgba(0, 240, 255, 0.15), 0 0 10px rgba(0, 240, 255, 0.2);
+            border-radius: 4px;
+            padding: 15px;
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hud-header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(3, 15, 39, 0.85);
+            border-bottom: 2px solid #00f0ff;
+            padding: 0 20px;
+            border-radius: 4px;
+            pointer-events: auto;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .hud-header h1 {
+            font-size: 18px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
+        }
+
+        .sys-status {
+            font-size: 12px;
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+            padding: 4px 10px;
+            border: 1px solid #00ff88;
+            border-radius: 3px;
+            box-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+        }
+
+        .panel-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px dashed rgba(0, 240, 255, 0.3);
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .stat-box {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 240, 255, 0.05);
+            padding: 8px 12px;
+            border-left: 3px solid #00f0ff;
+            font-size: 13px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(0, 240, 255, 0.5);
+        }
+
+        .bar-container {
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00f0ff, #00ff88);
+            width: 75%;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Khai báo thư viện Three.js thông qua CDN trực tuyến -->
+    <!-- Container chứa Three.js Canvas -->
+    <div id="webgl-container"></div>
+
+    <!-- Khung giao diện Sci-Fi HUD -->
+    <div class="hud-overlay">
+        <!-- Header trên cùng -->
+        <div class="hud-header">
+            <h1>Digital Twin Command Center // Minhtuan</h1>
+            <div class="sys-status">● SYSTEM ONLINE (99.8%)</div>
+        </div>
+
+        <!-- Panel Trái: Cảm biến & Thông số kỹ thuật -->
+        <div class="hud-panel">
+            <div class="panel-title">Telemetry & Sensors</div>
+            <div class="stat-box">
+                <span>Core Temperature</span>
+                <span class="stat-value">42.5 °C</span>
+            </div>
+            <div class="stat-box">
+                <span>Vibration Index</span>
+                <span class="stat-value">0.02 G</span>
+            </div>
+            <div class="stat-box">
+                <span>Power Load</span>
+                <span class="stat-value">1,420 kW</span>
+            </div>
+            <div class="panel-title" style="margin-top: 15px;">Network Stream</div>
+            <div style="font-size: 12px; color: #aaa;">
+                <div>Packet Loss: 0.01%</div>
+                <div class="bar-container"><div class="bar-fill" style="width: 92%;"></div></div>
+            </div>
+        </div>
+
+        <!-- Vùng giữa để trống giúp thao tác xoay/zoom mô hình 3D thoải mái -->
+        <div></div>
+
+        <!-- Panel Phải: Chẩn đoán & Trạng thái hoạt động -->
+        <div class="hud-panel">
+            <div class="panel-title">Operational Diagnostics</div>
+            <div class="stat-box">
+                <span>Model Status</span>
+                <span class="stat-value" style="color: #00ff88;">OPTIMIZED</span>
+            </div>
+            <div class="stat-box">
+                <span>Active Syncs</span>
+                <span class="stat-value">24 Nodes</span>
+            </div>
+            <div class="stat-box">
+                <span>Efficiency Rate</span>
+                <span class="stat-value">94.8%</span>
+            </div>
+            <div class="panel-title" style="margin-top: 15px;">Subsystem Health</div>
+            <div style="font-size: 12px; color: #aaa;">
+                <div>CPU Load: 34%</div>
+                <div class="bar-container"><div class="bar-fill" style="width: 34%;"></div></div>
+                <div style="margin-top: 8px;">Memory: 6.2 / 16 GB</div>
+                <div class="bar-container"><div class="bar-fill" style="width: 40%;"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Map cho Three.js -->
     <script type="importmap">
         {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
+          "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+          }
         }
     </script>
 
     <script type="module">
         import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // 1. Khởi tạo không gian hiển thị (Scene), Camera và Renderer
+        // 1. Khởi tạo Scene, Camera và Renderer
+        const container = document.getElementById('webgl-container');
         const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x020617); // Khớp màu nền xanh không gian
+
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 2, 5);
+
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
 
-        // 2. Thêm hệ thống ánh sáng để thấy rõ khối 3D
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+        // 2. Điều khiển chuột OrbitControls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // 3. Hệ thống ánh sáng phong cách Sci-Fi
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
         scene.add(ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
-        directionalLight.position.set(5, 10, 7);
-        scene.add(directionalLight);
+        const cyanLight = new THREE.DirectionalLight(0x00f0ff, 2.5);
+        cyanLight.position.set(5, 10, 7);
+        scene.add(cyanLight);
 
-        // 3. Thêm công cụ điều khiển chuột (Xoay, phóng to, thu nhỏ mô hình)
-        const controls = new OrbitControls(camera, renderer.domElement);
-        camera.position.set(0, 5, 10);
-        controls.update();
+        const purpleLight = new THREE.DirectionalLight(0x9333ea, 1.5);
+        purpleLight.position.set(-5, -5, -5);
+        scene.add(purpleLight);
 
-        // 4. Tải mô hình 3D (model.glb) vào trang web
+        // 4. Tải file model.glb
         const loader = new GLTFLoader();
-        loader.load('model.glb', (gltf) => {
-            scene.add(gltf.scene);
-            console.log('Đã tải mô hình thành công!');
-        }, undefined, (error) => {
-            console.error('Lỗi khi tải mô hình:', error);
+        loader.load(
+            './model.glb',
+            function (gltf) {
+                const model = gltf.scene;
+                scene.add(model);
+                console.log('Đã tải mô hình Digital Twin thành công!');
+            },
+            undefined,
+            function (error) {
+                console.error('Lỗi khi tải mô hình:', error);
+            }
+        );
+
+        // 5. Responsive Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // 5. Vòng lặp render liên tục khung hình
+        // 6. Vòng lặp Render
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);
         }
         animate();
-
-        // Tự động căn chỉnh lại khi thay đổi kích thước cửa sổ trình duyệt
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
     </script>
-
 </body>
 </html>
